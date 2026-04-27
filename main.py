@@ -4,6 +4,7 @@ import pandas
 import numpy
 
 
-dataset = PneumoniaMNIST(split="val",download=False,size=64)
+trainingData = PneumoniaMNIST(split="train",download=True,size=28)
+validationData =  PneumoniaMNIST(split="val",download=True,size=28)
+testData = PneumoniaMNIST(split="test",download=True,size=28)
 
-print(dataset)
