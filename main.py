@@ -17,12 +17,8 @@ trainingData = PneumoniaMNIST(split = "train", download = True, size = 28, trans
 validationData =  PneumoniaMNIST(split = "val", download = True,size = 28, transform = data_transform)
 testData = PneumoniaMNIST(split = "test", download = True, size = 28, transform = data_transform)
 
-train_loader = data.DataLoader(trainingData, batch_size = 64, shuffle = True)
-val_loader = data.DataLoader(validationData, batch_size = 64, shuffle = False)
-test_loader = data.DataLoader(testData, batch_size = 64, shuffle = False)
-
-print(trainingData)
-print("===================")
-print(testData)
+trainLoader = data.DataLoader(trainingData, batch_size = 64, shuffle = True)
+valLoader = data.DataLoader(validationData, batch_size = 64, shuffle = False)
+testLoader = data.DataLoader(testData, batch_size = 64, shuffle = False)
 
 trainingData.montage(length=1).save("montage.png")
