@@ -17,9 +17,9 @@ data_transform = transforms.Compose([
     transforms.Normalize(mean=[.5], std=[.5])
 ])
 
-trainingData = PneumoniaMNIST(split = "train", download = True, size = 24, transform = data_transform)
-validationData = PneumoniaMNIST(split = "val", download = True, size = 24, transform = data_transform)
-testData = PneumoniaMNIST(split = "test", download = True, size = 24, transform = data_transform)
+trainingData = PneumoniaMNIST(split = "train", download = True, size = 28, transform = data_transform)
+validationData = PneumoniaMNIST(split = "val", download = True, size = 28, transform = data_transform)
+testData = PneumoniaMNIST(split = "test", download = True, size = 28, transform = data_transform)
 
 trainLoader = data.DataLoader(trainingData, batch_size = 64, shuffle = True)
 trainLoaderEval = data.DataLoader(trainingData, batch_size = 64, shuffle = False)
@@ -62,7 +62,7 @@ class Net(nn.Module):
             nn.BatchNorm2d(64),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2))
-
+        
         self.fc = nn.Sequential(
             nn.Linear(64 * 4 * 4, 128),
             nn.ReLU(),
