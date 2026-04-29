@@ -7,6 +7,9 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as data
 import torchvision.transforms as transforms
+from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score, accuracy_score
+
+torch.manual_seed(42)
 
 data_transform = transforms.Compose([
     transforms.ToTensor(),
@@ -103,6 +106,7 @@ def test(split):
     model.eval()
     y_true = torch.tensor([])
     y_score = torch.tensor([])
+    y_pred = torch.tensor([])
     
     data_loader = trainLoaderEval if split == 'train' else testLoader
 
@@ -112,6 +116,10 @@ def test(split):
 
             targets = targets.squeeze().long()
             outputs = outputs.softmax(dim=-1)
+
+            predicted = outputs.argmax(dim=1)
+            y_pred = torch.cat((y_pred, predicted.float()), 0)
+
             targets = targets.float().resize_(len(targets), 1)
 
             y_true = torch.cat((y_true, targets), 0)
@@ -119,11 +127,21 @@ def test(split):
 
         y_true = y_true.numpy()
         y_score = y_score.detach().numpy()
-        
-        evaluator = Evaluator(data_flag, split)
-        metrics = evaluator.evaluate(y_score)
-    
-        print('%s  auc: %.3f  acc:%.3f' % (split, *metrics))
+
+        y_pred = y_pred.numpy()
+
+        accuracy  = accuracy_score(y_true, y_pred)
+        precision = precision_score(y_true, y_pred)
+        recall = recall_score(y_true, y_pred)
+        f1 = f1_score(y_true, y_pred)
+        roc_auc = roc_auc_score(y_true, y_score[:, 1])
+
+        print(f'\n{split} results:')
+        print(f'Accuracy: {accuracy:.3f}')
+        print(f'Precision: {precision:.3f}')
+        print(f'Recall: {recall:.3f}')
+        print(f'F1 Score: {f1:.3f}')
+        print(f'AUC: {roc_auc:.3f}')
 
 print('==> Evaluating ...')
 test('train')
