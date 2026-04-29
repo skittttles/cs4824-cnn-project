@@ -7,18 +7,19 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.utils.data as data
 import torchvision.transforms as transforms
+import matplotlib.pyplot as plt
 from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score, accuracy_score
 
-torch.manual_seed(42)
+torch.manual_seed(21)
 
 data_transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize(mean=[.5], std=[.5])
 ])
 
-trainingData = PneumoniaMNIST(split = "train", download = True, size = 28, transform = data_transform)
-validationData = PneumoniaMNIST(split = "val", download = True, size = 28, transform = data_transform)
-testData = PneumoniaMNIST(split = "test", download = True, size = 28, transform = data_transform)
+trainingData = PneumoniaMNIST(split = "train", download = True, size = 24, transform = data_transform)
+validationData = PneumoniaMNIST(split = "val", download = True, size = 24, transform = data_transform)
+testData = PneumoniaMNIST(split = "test", download = True, size = 24, transform = data_transform)
 
 trainLoader = data.DataLoader(trainingData, batch_size = 64, shuffle = True)
 trainLoaderEval = data.DataLoader(trainingData, batch_size = 64, shuffle = False)
@@ -146,3 +147,19 @@ def test(split):
 print('==> Evaluating ...')
 test('train')
 test('test')
+
+#Visualize some datapoints
+
+examples = enumerate(testLoader)
+batch_idx, (example_data, example_targets) = next(examples)
+
+for i in range(10):
+    plt.subplot(2,5, i+1)
+    plt.imshow(example_data[i][0], cmap='gray', interpolation='none')
+    output = model(example_data)
+    plt.title("Label:{}\nPred:{}".format(example_targets.data[i].item(), output.data.max(1, keepdim=True)[1][i].item()))
+    plt.xticks([])
+    plt.yticks([])
+
+plt.savefig("predictions.png")
+plt.show()
