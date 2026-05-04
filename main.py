@@ -8,12 +8,11 @@ import torch.optim as optim
 import torch.utils.data as data
 import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
-from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score, accuracy_score
+from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score, accuracy_score, confusion_matrix
 
-torch.manual_seed(21)
+torch.manual_seed(42)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(device)
 
 data_transform = transforms.Compose([
     transforms.ToTensor(),
@@ -33,7 +32,7 @@ testLoader = data.DataLoader(testData, batch_size = 128, shuffle = False)
 
 task = "binary-class"
 lr = 0.001
-NUM_EPOCHS = 3
+NUM_EPOCHS = 5
 data_flag = "pneumoniamnist" 
 
 # CNN
@@ -153,12 +152,21 @@ def test(split):
         f1 = f1_score(y_true, y_pred)
         roc_auc = roc_auc_score(y_true, y_score[:, 1])
 
+        cm = confusion_matrix(y_true, y_pred)
+        TN, FP, FN, TP = cm.ravel()
+
         print(f'\n{split} results:')
         print(f'Accuracy: {accuracy:.3f}')
         print(f'Precision: {precision:.3f}')
         print(f'Recall: {recall:.3f}')
         print(f'F1 Score: {f1:.3f}')
-        print(f'AUC: {roc_auc:.3f}')
+        print(f'AUC: {roc_auc:.3f}\n')
+
+        print(f'Confusion Matrix:\n{cm}')
+        print(f'True Positive: {int(TP)}')
+        print(f'True Negative: {int(TN)}')
+        print(f'False Positive: {int(FP)}') 
+        print(f'False Negative: {int(FN)}')
 
 print('==> Evaluating ...')
 test('train')
