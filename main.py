@@ -12,19 +12,24 @@ from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_sco
 
 torch.manual_seed(21)
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(device)
+
 data_transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize(mean=[.5], std=[.5])
 ])
 
-trainingData = PneumoniaMNIST(split = "train", download = True, size = 28, transform = data_transform)
-validationData = PneumoniaMNIST(split = "val", download = True, size = 28, transform = data_transform)
-testData = PneumoniaMNIST(split = "test", download = True, size = 28, transform = data_transform)
+SIZE = 128
 
-trainLoader = data.DataLoader(trainingData, batch_size = 64, shuffle = True)
-trainLoaderEval = data.DataLoader(trainingData, batch_size = 64, shuffle = False)
-valLoader = data.DataLoader(validationData, batch_size = 64, shuffle = False)
-testLoader = data.DataLoader(testData, batch_size = 64, shuffle = False)
+trainingData = PneumoniaMNIST(split = "train", download = True, size = SIZE, transform = data_transform)
+validationData = PneumoniaMNIST(split = "val", download = True, size = SIZE, transform = data_transform)
+testData = PneumoniaMNIST(split = "test", download = True, size = SIZE, transform = data_transform)
+
+trainLoader = data.DataLoader(trainingData, batch_size = 128, shuffle = True)
+trainLoaderEval = data.DataLoader(trainingData, batch_size = 128, shuffle = False)
+valLoader = data.DataLoader(validationData, batch_size = 128, shuffle = False)
+testLoader = data.DataLoader(testData, batch_size = 128, shuffle = False)
 
 task = "binary-class"
 lr = 0.001
@@ -64,11 +69,20 @@ class Net(nn.Module):
             nn.MaxPool2d(kernel_size=2, stride=2))
         
         self.fc = nn.Sequential(
-            nn.Linear(64 * 4 * 4, 128),
+            nn.Linear(self._get_flat_size(in_channels), 128),
             nn.ReLU(),
             nn.Linear(128, 128),
             nn.ReLU(),
             nn.Linear(128, num_classes))
+
+    def _get_flat_size(self, in_channels):
+        dummy = torch.zeros(1, in_channels, SIZE, SIZE)
+        x = self.layer1(dummy)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+        x = self.layer5(x)
+        return x.view(1, -1).shape[1]        
 
     def forward(self, x):
         x = self.layer1(x)
@@ -80,7 +94,7 @@ class Net(nn.Module):
         x = self.fc(x)
         return x
 
-model = Net(in_channels=1, num_classes=2)
+model = Net(in_channels=1, num_classes=2).to(device)
 
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(model.parameters(), lr=lr, momentum=0.9)
@@ -91,6 +105,7 @@ for epoch in range(NUM_EPOCHS):
 
     model.train()
     for inputs, targets in tqdm(trainLoader):
+        inputs, targets = inputs.to(device), targets.to(device)
         # forward + backward + optimize
         optimizer.zero_grad()
         outputs = model(inputs)
@@ -113,18 +128,19 @@ def test(split):
 
     with torch.no_grad():
         for inputs, targets in data_loader:
+            inputs, targets = inputs.to(device), targets.to(device)
             outputs = model(inputs)
 
             targets = targets.squeeze().long()
             outputs = outputs.softmax(dim=-1)
 
             predicted = outputs.argmax(dim=1)
-            y_pred = torch.cat((y_pred, predicted.float()), 0)
+            y_pred = torch.cat((y_pred, predicted.float().cpu()), 0)
 
             targets = targets.float().resize_(len(targets), 1)
 
-            y_true = torch.cat((y_true, targets), 0)
-            y_score = torch.cat((y_score, outputs), 0)
+            y_true = torch.cat((y_true, targets.cpu()), 0)
+            y_score = torch.cat((y_score, outputs.cpu()), 0)
 
         y_true = y_true.numpy()
         y_score = y_score.detach().numpy()
@@ -156,8 +172,8 @@ batch_idx, (example_data, example_targets) = next(examples)
 for i in range(10):
     plt.subplot(2,5, i+1)
     plt.imshow(example_data[i][0], cmap='gray', interpolation='none')
-    output = model(example_data)
-    plt.title("Label:{}\nPred:{}".format(example_targets.data[i].item(), output.data.max(1, keepdim=True)[1][i].item()))
+    output = model(example_data.to(device))
+    plt.title("Label:{}\nPred:{}".format(example_targets.data[i].item(), output.cpu().data.max(1, keepdim=True)[1][i].item()))
     plt.xticks([])
     plt.yticks([])
 
