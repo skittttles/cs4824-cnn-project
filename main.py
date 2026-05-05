@@ -10,7 +10,8 @@ import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
 from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_score, accuracy_score, confusion_matrix
 
-torch.manual_seed(42)
+torch.manual_seed(42941)
+torch.cuda.manual_seed_all(42941)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -28,11 +29,11 @@ testData = PneumoniaMNIST(split = "test", download = True, size = SIZE, transfor
 trainLoader = data.DataLoader(trainingData, batch_size = 128, shuffle = True)
 trainLoaderEval = data.DataLoader(trainingData, batch_size = 128, shuffle = False)
 valLoader = data.DataLoader(validationData, batch_size = 128, shuffle = False)
-testLoader = data.DataLoader(testData, batch_size = 128, shuffle = False)
+testLoader = data.DataLoader(testData, batch_size = 128, shuffle = True)
 
 task = "binary-class"
 lr = 0.001
-NUM_EPOCHS = 5
+NUM_EPOCHS = 20
 data_flag = "pneumoniamnist" 
 
 # CNN
