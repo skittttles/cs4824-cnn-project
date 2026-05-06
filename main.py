@@ -12,7 +12,7 @@ from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_sco
 
 torch.manual_seed(42941)
 torch.cuda.manual_seed_all(42941)
-SIZE = 128
+SIZE = 28
 NUM_EPOCHS = 20
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
