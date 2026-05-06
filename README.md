@@ -4,7 +4,7 @@ Final Project for CS4824 ML Project by
 Nathan Lee and Zachary Babka
 
 ## Project Description
-Design and evaluate machine learning models to automatically classify biomedical images. The project focuses on translating raw image data into clinically meaningful predictions.
+Design and evaluate machine learning models to automatically classify biomedical images for Pneumonia. The project focuses on translating raw image data into clinically meaningful predictions.
 
 ## Requirements
 
