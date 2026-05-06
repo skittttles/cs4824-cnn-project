@@ -12,6 +12,8 @@ from sklearn.metrics import f1_score, precision_score, recall_score, roc_auc_sco
 
 torch.manual_seed(42941)
 torch.cuda.manual_seed_all(42941)
+SIZE = 128
+NUM_EPOCHS = 20
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -20,7 +22,6 @@ data_transform = transforms.Compose([
     transforms.Normalize(mean=[.5], std=[.5])
 ])
 
-SIZE = 128
 
 trainingData = PneumoniaMNIST(split = "train", download = True, size = SIZE, transform = data_transform)
 validationData = PneumoniaMNIST(split = "val", download = True, size = SIZE, transform = data_transform)
@@ -33,7 +34,6 @@ testLoader = data.DataLoader(testData, batch_size = 128, shuffle = True)
 
 task = "binary-class"
 lr = 0.001
-NUM_EPOCHS = 20
 data_flag = "pneumoniamnist" 
 
 # CNN
