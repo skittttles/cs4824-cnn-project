@@ -1,7 +1,7 @@
 # cs4824 ML Model Final Project
 Final Project for CS4824 ML Project by 
 
-Nathan Lee and Zachary Babka
+Nathan Le and Zachary Babka
 
 ## Project Description
 Design and evaluate machine learning models to automatically classify biomedical images for Pneumonia. The project focuses on translating raw image data into clinically meaningful predictions.
